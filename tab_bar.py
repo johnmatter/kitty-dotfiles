@@ -1,4 +1,4 @@
-"""Custom tab bar with wiki tab on the right side"""
+"""Custom tab bar with theme-aware colors"""
 # pyright: reportMissingImports=false
 
 from kitty.fast_data_types import Screen, get_options
@@ -32,10 +32,6 @@ TAB_COLORS = {
     'tab_separator': {
         'fg': 'color8',            # Tab separator color
         'bg': 'background',        # Tab separator background
-    },
-    'wiki_tab': {
-        'fg': 'color3',            # Wiki tab text color (yellow)
-        'bg': 'color5',            # Wiki tab background (magenta)
     }
 }
 
@@ -67,7 +63,7 @@ def _apply_tab_colors(screen: Screen, tab_type: str, element: str = 'fg'):
             elif element == 'bg':
                 screen.cursor.bg = as_rgb(color_as_int(color_value))
 
-def _draw_left_status(
+def _draw_tab(
     draw_data: DrawData,
     screen: Screen,
     tab: TabBarData,
@@ -77,26 +73,15 @@ def _draw_left_status(
     is_last: bool,
     extra_data: ExtraData,
 ) -> int:
-    """Draw regular tabs on the left, wiki tab on the right"""
+    """Draw tab with theme-aware colors"""
     if draw_data.leading_spaces:
         screen.draw(" " * draw_data.leading_spaces)
     
-    # Wiki tab gets drawn on the right side
-    wiki_tab_length = 6  # Length of " wiki "
-    if tab.title != 'wiki':
-        # Draw regular tab with configured colors
-        tab_type = 'active_tab' if tab.is_active else 'inactive_tab'
-        _apply_tab_colors(screen, tab_type, 'fg')
-        _apply_tab_colors(screen, tab_type, 'bg')
-        draw_title(draw_data, screen, tab, index)
-    else:
-        # Draw wiki tab on the right side with special colors
-        save_x = screen.cursor.x
-        screen.cursor.x = screen.columns - wiki_tab_length
-        _apply_tab_colors(screen, 'wiki_tab', 'fg')
-        _apply_tab_colors(screen, 'wiki_tab', 'bg')
-        draw_title(draw_data, screen, tab, index)
-        screen.cursor.x = save_x
+    # Draw tab with configured colors
+    tab_type = 'active_tab' if tab.is_active else 'inactive_tab'
+    _apply_tab_colors(screen, tab_type, 'fg')
+    _apply_tab_colors(screen, tab_type, 'bg')
+    draw_title(draw_data, screen, tab, index)
     
     trailing_spaces = min(max_title_length - 1, draw_data.trailing_spaces)
     max_title_length -= trailing_spaces
@@ -132,10 +117,7 @@ def draw_tab(
     extra_data: ExtraData,
 ) -> int:
     """Main draw function"""
-    # Draw the tab (wiki tab will be positioned on the right automatically)
-    end = _draw_left_status(
+    return _draw_tab(
         draw_data, screen, tab, before, max_title_length, 
         index, is_last, extra_data
-    )
-    
-    return end 
+    ) 
