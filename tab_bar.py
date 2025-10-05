@@ -8,32 +8,8 @@ from kitty.utils import color_as_int
 
 opts = get_options()
 
-# Tab Color Configuration
-# Maps tab elements to specific theme colors
-# Available colors: background, foreground, cursor, selection_background, selection_foreground
-# color0-color15 (standard ANSI colors), or any custom colors defined in your theme
-TAB_COLORS = {
-    'active_tab': {
-        'fg': 'foreground',        # Active tab text color
-        'bg': 'color8',            # Active tab background (bright black)
-    },
-    'inactive_tab': {
-        'fg': 'color7',            # Inactive tab text color (light gray)
-        'bg': 'background',        # Inactive tab background
-    },
-    'active_tab_hover': {
-        'fg': 'foreground',        # Active tab text when hovered
-        'bg': 'color10',           # Active tab background when hovered (bright green)
-    },
-    'inactive_tab_hover': {
-        'fg': 'color15',           # Inactive tab text when hovered (bright white)
-        'bg': 'color8',            # Inactive tab background when hovered
-    },
-    'tab_separator': {
-        'fg': 'color8',            # Tab separator color
-        'bg': 'background',        # Tab separator background
-    }
-}
+# Colors to cycle through for inactive tabs (color1-color5)
+INACTIVE_TAB_COLORS = ['color1', 'color2', 'color3', 'color4', 'color5']
 
 def _get_theme_color(color_name: str) -> int:
     """Get a color value from the current kitty theme"""
@@ -52,17 +28,6 @@ def _get_theme_color(color_name: str) -> int:
         # If color doesn't exist, fallback to foreground
         return opts.foreground
 
-def _apply_tab_colors(screen: Screen, tab_type: str, element: str = 'fg'):
-    """Apply configured colors to screen cursor"""
-    if tab_type in TAB_COLORS:
-        color_name = TAB_COLORS[tab_type].get(element)
-        if color_name:
-            color_value = _get_theme_color(color_name)
-            if element == 'fg':
-                screen.cursor.fg = as_rgb(color_as_int(color_value))
-            elif element == 'bg':
-                screen.cursor.bg = as_rgb(color_as_int(color_value))
-
 def _draw_tab(
     draw_data: DrawData,
     screen: Screen,
@@ -77,11 +42,26 @@ def _draw_tab(
     if draw_data.leading_spaces:
         screen.draw(" " * draw_data.leading_spaces)
     
-    # Draw tab with configured colors
-    tab_type = 'active_tab' if tab.is_active else 'inactive_tab'
-    _apply_tab_colors(screen, tab_type, 'fg')
-    _apply_tab_colors(screen, tab_type, 'bg')
-    draw_title(draw_data, screen, tab, index)
+    # Set colors based on tab state
+    if tab.is_active:
+        # Active tab: color0 background, foreground text
+        screen.cursor.bg = as_rgb(color_as_int(_get_theme_color('color0')))
+        screen.cursor.fg = as_rgb(color_as_int(_get_theme_color('foreground')))
+    else:
+        # Inactive tab: cycle through color1-color5 background, color0 text
+        color_index = index % len(INACTIVE_TAB_COLORS)
+        bg_color_name = INACTIVE_TAB_COLORS[color_index]
+        screen.cursor.bg = as_rgb(color_as_int(_get_theme_color(bg_color_name)))
+        screen.cursor.fg = as_rgb(color_as_int(_get_theme_color('color0')))
+    
+    # Draw the tab title with padding
+    title = tab.title
+    if len(title) > max_title_length - 4:  # Account for padding (2 spaces on each side)
+        title = title[:max_title_length-5] + "…"
+    
+    # Add padding: 2 spaces before and after the title
+    padded_title = "  " + title + "  "
+    screen.draw(padded_title)
     
     trailing_spaces = min(max_title_length - 1, draw_data.trailing_spaces)
     max_title_length -= trailing_spaces
@@ -95,10 +75,10 @@ def _draw_tab(
     
     screen.cursor.bold = screen.cursor.italic = False
     
-    # Apply separator colors
+    # Draw separator
     if not is_last:
-        _apply_tab_colors(screen, 'tab_separator', 'fg')
-        _apply_tab_colors(screen, 'tab_separator', 'bg')
+        screen.cursor.fg = as_rgb(color_as_int(_get_theme_color('color8')))
+        screen.cursor.bg = as_rgb(color_as_int(_get_theme_color('background')))
         screen.draw(draw_data.sep)
     
     # Reset colors
