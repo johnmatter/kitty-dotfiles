@@ -58,9 +58,9 @@ def draw_tab(
     
     # Set colors based on tab state
     if tab.is_active:
-        # Active tab: color0 background, foreground text
-        screen.cursor.bg = as_rgb(color_as_int(_get_theme_color('color0')))
-        screen.cursor.fg = as_rgb(color_as_int(_get_theme_color('foreground')))
+        # Active tab: inverted colors - background color for text, foreground color for background
+        screen.cursor.bg = as_rgb(color_as_int(_get_theme_color('foreground')))
+        screen.cursor.fg = as_rgb(color_as_int(_get_theme_color('background')))
     else:
         # Inactive tab: cycle through color1-color5 background, color0 text
         color_index = index % len(INACTIVE_TAB_COLORS)
