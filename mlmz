@@ -4,7 +4,7 @@ new_tab manzanita
 layout splits
 cd /Users/matter/Music/madrona/migrate-20250929/manzanita
 title manzanita
-launch cursor-agent
+launch claude
 launch --location=vsplit --cwd=current fish
 resize_window wider 15
 focus
@@ -22,7 +22,7 @@ new_tab madronalib
 layout splits
 cd /Users/matter/Music/madrona/migrate-20250929/madronalib
 title madronalib
-launch cursor-agent
+launch claude
 launch --location=vsplit --cwd=current fish
 resize_window wider 15
 focus
