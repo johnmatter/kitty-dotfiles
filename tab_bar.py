@@ -56,17 +56,21 @@ def draw_tab(
     if draw_data.leading_spaces:
         screen.draw(" " * draw_data.leading_spaces)
     
-    # Set colors based on tab state
+    # Set colors and styling based on tab state
     if tab.is_active:
         # Active tab: inverted colors - background color for text, foreground color for background
         screen.cursor.bg = as_rgb(color_as_int(_get_theme_color('foreground')))
         screen.cursor.fg = as_rgb(color_as_int(_get_theme_color('background')))
+        screen.cursor.bold = False
+        screen.cursor.italic = True
     else:
         # Inactive tab: cycle through color1-color5 background, color0 text
         color_index = index % len(INACTIVE_TAB_COLORS)
         bg_color_name = INACTIVE_TAB_COLORS[color_index]
         screen.cursor.bg = as_rgb(color_as_int(_get_theme_color(bg_color_name)))
         screen.cursor.fg = as_rgb(color_as_int(_get_theme_color('color0')))
+        screen.cursor.bold = False
+        screen.cursor.italic = False
     
     # Draw the tab title with center justification
     title = tab.title
@@ -103,6 +107,7 @@ def draw_tab(
     if trailing_spaces:
         screen.draw(" " * trailing_spaces)
     
+    # Reset text styling
     screen.cursor.bold = screen.cursor.italic = False
     
     # Draw separator
