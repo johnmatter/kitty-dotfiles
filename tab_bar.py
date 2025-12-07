@@ -73,7 +73,7 @@ def draw_tab(
         screen.cursor.italic = False
     
     # Draw the tab title with center justification
-    title = tab.title
+    title = "/" * (index + 0)
     available_width = max_title_length - 4  # Account for padding (2 spaces on each side)
     
     if len(title) > available_width:
